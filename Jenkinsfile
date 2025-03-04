@@ -11,36 +11,37 @@ pipeline {
         stage('Setup') {
             steps {
                 sh '''
+                    # Use bash instead of sh for compatibility
                     set -e
-                    
                     echo "🔧 Installing Required Packages..."
                     sudo apt update -y
+                    sudo apt install -y lsb-release
 
-                    # Check Ubuntu version and install Python accordingly
                     UBUNTU_VERSION=$(lsb_release -rs)
 
-                    if [[ "$UBUNTU_VERSION" == "22.04" ]]; then
+                    if [ "$UBUNTU_VERSION" = "22.04" ]; then
                         echo "🐍 Installing Python 3.10 for Ubuntu 22.04..."
-                        sudo apt install -y python3.10 python3.10-venv python3.10-dev
+                        sudo apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
+                        PYTHON_BIN="python3.10"
                     else
                         echo "🐍 Installing Python 3.9 using Deadsnakes PPA..."
                         sudo add-apt-repository ppa:deadsnakes/ppa -y
                         sudo apt update -y
-                        sudo apt install -y python3.9 python3.9-venv python3.9-dev
+                        sudo apt install -y python3.9 python3.9-venv python3.9-dev python3-pip
+                        PYTHON_BIN="python3.9"
                     fi
 
                     echo "🐍 Ensuring Python is Default..."
-                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+                    sudo update-alternatives --install /usr/bin/python python /usr/bin/$PYTHON_BIN 1
 
                     echo "🐍 Upgrading Pip..."
-                    python3 -m ensurepip --default-pip
-                    python3 -m pip install --upgrade pip
-
+                    $PYTHON_BIN -m pip install --upgrade pip
+                    
                     echo "📦 Installing Python Dependencies..."
-                    python3 -m pip install -r lambda-app/tests/requirements.txt
+                    $PYTHON_BIN -m pip install -r lambda-app/tests/requirements.txt
                     
                     echo "🔧 Installing pytest globally..."
-                    python3 -m pip install pytest  # Ensure pytest is installed
+                    $PYTHON_BIN -m pip install pytest  # Ensure pytest is installed
 
                     echo "☁️ Checking & Installing AWS SAM CLI..."
                     if ! command -v sam &> /dev/null
