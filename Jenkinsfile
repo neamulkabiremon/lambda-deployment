@@ -11,8 +11,9 @@ pipeline {
         stage('Setup') {
             steps {
                 sh '''
+                    set -e
                     python3 -m venv venv
-                    source venv/bin/activate
+                    . venv/bin/activate
                     pip3 install --upgrade pip
                     pip3 install -r lambda-app/tests/requirements.txt
                 '''
@@ -22,7 +23,8 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    source venv/bin/activate
+                    set -e
+                    . venv/bin/activate
                     pytest
                 '''
             }
@@ -31,7 +33,8 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    source venv/bin/activate
+                    set -e
+                    . venv/bin/activate
                     sam build -t lambda-app/template.yaml
                 '''
             }
@@ -40,7 +43,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    source venv/bin/activate
+                    set -e
+                    . venv/bin/activate
                     sam deploy -t lambda-app/template.yaml --no-confirm-changeset --no-fail-on-empty-changeset
                 '''
             }
