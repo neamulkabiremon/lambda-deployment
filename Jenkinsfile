@@ -15,16 +15,20 @@ pipeline {
                     
                     echo "🔧 Installing Required Packages..."
                     sudo apt update -y
-                    sudo apt install -y python3-pip unzip curl
+                    sudo apt install -y python3.9 python3.9-venv python3.9-dev unzip curl
+                    
+                    echo "🐍 Ensuring Python 3.9 is Default..."
+                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
 
                     echo "🐍 Upgrading Pip..."
-                    pip3 install --upgrade pip
+                    python3.9 -m ensurepip --default-pip
+                    python3.9 -m pip install --upgrade pip
 
                     echo "📦 Installing Python Dependencies..."
-                    pip3 install -r lambda-app/tests/requirements.txt
+                    python3.9 -m pip install -r lambda-app/tests/requirements.txt
                     
                     echo "🔧 Installing pytest globally..."
-                    pip3 install pytest  # Ensure pytest is installed globally
+                    python3.9 -m pip install pytest  # Ensure pytest is installed for Python 3.9
 
                     echo "☁️ Checking & Installing AWS SAM CLI..."
                     if ! command -v sam &> /dev/null
@@ -48,7 +52,7 @@ pipeline {
                 sh '''
                     set -e
                     echo "🧪 Running Tests..."
-                    python3 -m pytest  # Use Python interpreter to run pytest
+                    python3.9 -m pytest  # Use Python 3.9 explicitly
                 '''
             }
         }
@@ -58,7 +62,7 @@ pipeline {
                 sh '''
                     set -e
                     echo "🏗️ Building SAM Application..."
-                    sam build -t lambda-app/template.yaml
+                    sam build -t lambda-app/template.yaml --use-container  # Ensures compatibility
                 '''
             }
         }
