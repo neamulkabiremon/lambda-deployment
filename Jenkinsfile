@@ -16,19 +16,9 @@ pipeline {
                     sudo apt update -y
                     sudo apt install -y lsb-release
 
-                    UBUNTU_VERSION=$(lsb_release -rs)
-
-                    if [ "$UBUNTU_VERSION" = "22.04" ]; then
-                        echo "🐍 Installing Python 3.10 for Ubuntu 22.04..."
-                        sudo apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
-                        PYTHON_BIN="python3.10"
-                    else
-                        echo "🐍 Installing Python 3.9 using Deadsnakes PPA..."
-                        sudo add-apt-repository ppa:deadsnakes/ppa -y
-                        sudo apt update -y
-                        sudo apt install -y python3.9 python3.9-venv python3.9-dev python3-pip
-                        PYTHON_BIN="python3.9"
-                    fi
+                    echo "🐍 Installing Python..."
+                    sudo apt install -y python3 python3-venv python3-dev python3-pip
+                    PYTHON_BIN="python3"
 
                     echo "🐍 Ensuring Python is Default..."
                     sudo update-alternatives --install /usr/bin/python python /usr/bin/$PYTHON_BIN 1
