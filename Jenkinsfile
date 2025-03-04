@@ -11,7 +11,6 @@ pipeline {
         stage('Setup') {
             steps {
                 sh '''
-                    # Use bash instead of sh for compatibility
                     set -e
                     echo "🔧 Installing Required Packages..."
                     sudo apt update -y
@@ -47,7 +46,10 @@ pipeline {
                     if ! command -v sam &> /dev/null
                     then
                         echo "🚀 Installing AWS SAM CLI..."
-                        curl -Lo aws-sam-cli.zip https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+                        if ! curl -Lo aws-sam-cli.zip https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip --retry 5 --retry-delay 5; then
+                            echo "❌ Curl failed, trying wget..."
+                            wget -O aws-sam-cli.zip https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+                        fi
                         unzip -o aws-sam-cli.zip -d sam-installation  # Force overwrite
                         sudo ./sam-installation/install --update
                         rm -rf aws-sam-cli.zip sam-installation
