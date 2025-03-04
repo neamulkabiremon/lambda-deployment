@@ -23,6 +23,9 @@ pipeline {
                     echo "📦 Installing Python Dependencies..."
                     pip3 install -r lambda-app/tests/requirements.txt
                     
+                    echo "🔧 Installing pytest globally..."
+                    pip3 install pytest  # Ensure pytest is installed globally
+
                     echo "☁️ Checking & Installing AWS SAM CLI..."
                     if ! command -v sam &> /dev/null
                     then
@@ -45,7 +48,7 @@ pipeline {
                 sh '''
                     set -e
                     echo "🧪 Running Tests..."
-                    pytest
+                    python3 -m pytest  # Use Python interpreter to run pytest
                 '''
             }
         }
