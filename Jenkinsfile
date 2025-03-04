@@ -17,8 +17,11 @@ pipeline {
                     . venv/bin/activate
 
                     # Upgrade pip and install dependencies
-                    pip3 install --upgrade pip
-                    pip3 install -r lambda-app/tests/requirements.txt
+                    pip install --upgrade pip
+                    pip install -r lambda-app/tests/requirements.txt
+
+                    # Ensure pytest is installed in venv
+                    pip install pytest
 
                     # Install SAM CLI if missing
                     if ! command -v sam &> /dev/null; then
@@ -29,8 +32,9 @@ pipeline {
                         rm -rf aws-sam-cli.zip sam-installation
                     fi
 
-                    # Verify SAM installation
+                    # Verify installations
                     sam --version
+                    pytest --version
                 '''
             }
         }
@@ -39,7 +43,8 @@ pipeline {
             steps {
                 sh '''
                     set -e
-                    pytest
+                    . venv/bin/activate
+                    pytest lambda-app/tests/
                 '''
             }
         }
@@ -48,6 +53,7 @@ pipeline {
             steps {
                 sh '''
                     set -e
+                    . venv/bin/activate
                     sam build -t lambda-app/template.yaml
                 '''
             }
@@ -57,6 +63,7 @@ pipeline {
             steps {
                 sh '''
                     set -e
+                    . venv/bin/activate
                     sam deploy -t lambda-app/template.yaml --no-confirm-changeset --no-fail-on-empty-changeset
                 '''
             }
